@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Clothing = require("../models/Clothing");
 const Employee = require("../models/Employee");
-const ClothingType = require("../models/ClothingType"); // ← 🔥 To był brakujący import
+const ClothingType = require("../models/ClothingType");
 
 // ✅ Dodawanie nowego ubrania do systemu
 router.post("/add", async (req, res) => {
@@ -28,6 +28,16 @@ router.post("/add", async (req, res) => {
 });
 
 // ✅ Pobieranie wszystkich ubrań
+router.get("/", async (req, res) => {
+  try {
+    const clothing = await Clothing.find().populate("employee");
+    res.json(clothing);
+  } catch (error) {
+    console.error("❌ Błąd pobierania ubrań:", error);
+    res.status(500).json({ message: "Błąd serwera", error: error.message });
+  }
+});
+
 // ✅ Generowanie raportu brakującej odzieży
 router.get("/shortage", async (req, res) => {
   console.log("📊 Analiza brakującej odzieży...");
@@ -72,11 +82,48 @@ router.get("/shortage", async (req, res) => {
   }
 });
 
-// ✅ Pobieranie konkretnego ubrania po ID
+// ✅ Generowanie zamówienia brakującej odzieży (musi być PRZED `/:id`)
+router.get("/order", async (req, res) => {
+  console.log("📦 Generowanie propozycji zamówienia...");
+
+  try {
+    // Pobieramy raport braków
+    const shortageResponse = await fetch(
+      `http://localhost:5001/clothing/shortage`
+    );
+    const shortageData = await shortageResponse.json();
+
+    let orderSummary = {};
+
+    shortageData.forEach((employeeShortage) => {
+      Object.entries(employeeShortage.missingItems).forEach(
+        ([clothingType, count]) => {
+          if (!orderSummary[clothingType]) {
+            orderSummary[clothingType] = 0;
+          }
+          orderSummary[clothingType] += count;
+        }
+      );
+    });
+
+    console.log("✅ Zamówienie odzieży:", orderSummary);
+    res.json(orderSummary);
+  } catch (error) {
+    console.error("❌ Błąd generowania zamówienia:", error);
+    res.status(500).json({ message: "Błąd serwera", error: error.message });
+  }
+});
+
+// ✅ Pobieranie konkretnego ubrania po ID (musi być PO `/order`)
 router.get("/:id", async (req, res) => {
   console.log(`🔍 Pobieranie ubrania o ID: ${req.params.id}`);
 
   try {
+    // Sprawdzamy, czy ID ma poprawny format
+    if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ message: "Niepoprawny format ID!" });
+    }
+
     const clothing = await Clothing.findById(req.params.id).populate(
       "employee"
     );
