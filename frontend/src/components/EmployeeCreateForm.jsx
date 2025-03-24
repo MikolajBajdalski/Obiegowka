@@ -5,7 +5,7 @@ const EmployeeCreateForm = ({ onCancel, onSave }) => {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    gender: "Mężczyzna", // Domyślna wartość zgodna z backendem
+    gender: "", // Domyślna wartość zgodna z backendem
     department: "",
     position: "",
   });
@@ -72,6 +72,9 @@ const EmployeeCreateForm = ({ onCancel, onSave }) => {
               className="w-full border p-2 rounded bg-gray-700 text-white"
               required
             >
+              <option value="" disabled>
+                -- Wybierz płeć --
+              </option>
               <option value="Mężczyzna">Mężczyzna</option>
               <option value="Kobieta">Kobieta</option>
             </select>
@@ -79,26 +82,42 @@ const EmployeeCreateForm = ({ onCancel, onSave }) => {
 
           <label className="block mb-2 text-white">
             Dział:
-            <input
-              type="text"
+            <select
               name="department"
               value={formData.department}
               onChange={handleChange}
               className="w-full border p-2 rounded bg-gray-700 text-white"
               required
-            />
+            >
+              <option value="" disabled>
+                -- Wybierz dział --
+              </option>
+              <option value="GAZY">GAZY</option>
+              <option value="OKNA">OKNA</option>
+              <option value="PPOŻ">PPOŻ</option>
+            </select>
           </label>
 
           <label className="block mb-2 text-white">
             Stanowisko:
-            <input
-              type="text"
+            <select
               name="position"
               value={formData.position}
               onChange={handleChange}
               className="w-full border p-2 rounded bg-gray-700 text-white"
               required
-            />
+            >
+              <option value="" disabled>
+                -- Wybierz stanowisko --
+              </option>
+              <option value="Pracownik biurowy">Pracownik biurowy</option>
+              <option value="Handlowiec">Handlowiec</option>
+              <option value="Magazynier">Magazynier</option>
+              <option value="Kierowca">Kierowca</option>
+              <option value="Techniczny">Techniczny</option>
+              <option value="Serwisant PPOŻ">Serwisant PPOŻ</option>
+              <option value="Montażysta">Montażysta</option>
+            </select>
           </label>
 
           <div className="flex justify-end mt-4">

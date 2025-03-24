@@ -10,8 +10,8 @@ const EmployeeEditForm = ({ employee, onCancel, onSave }) => {
     firstName: employee.firstName || "",
     lastName: employee.lastName || "",
     gender: employee.gender || "Mężczyzna",
-    department: employee.department || "",
-    position: employee.position || "",
+    department: employee.department || "GAZY",
+    position: employee.position || "Pracownik biurowy",
   });
 
   const handleChange = (e) => {
@@ -78,26 +78,36 @@ const EmployeeEditForm = ({ employee, onCancel, onSave }) => {
 
           <div>
             <label className="block text-gray-400 mb-1">Dział</label>
-            <input
-              type="text"
+            <select
               name="department"
               value={formData.department}
               onChange={handleChange}
               className="w-full border p-2 bg-gray-700 text-white rounded"
               required
-            />
+            >
+              <option value="GAZY">GAZY</option>
+              <option value="OKNA">OKNA</option>
+              <option value="PPOŻ">PPOŻ</option>
+            </select>
           </div>
 
           <div>
             <label className="block text-gray-400 mb-1">Stanowisko</label>
-            <input
-              type="text"
+            <select
               name="position"
               value={formData.position}
               onChange={handleChange}
               className="w-full border p-2 bg-gray-700 text-white rounded"
               required
-            />
+            >
+              <option value="Pracownik biurowy">Pracownik biurowy</option>
+              <option value="Handlowiec">Handlowiec</option>
+              <option value="Magazynier">Magazynier</option>
+              <option value="Kierowca">Kierowca</option>
+              <option value="Techniczny">Techniczny</option>
+              <option value="Serwisant PPOŻ">Serwisant PPOŻ</option>
+              <option value="Montażysta">Montażysta</option>
+            </select>
           </div>
 
           <div className="flex justify-end space-x-2 mt-4">
