@@ -11,9 +11,10 @@ connectDB();
 // 🛠️ Middleware (Obsługa JSON i CORS)
 app.use(express.json());
 app.use(cors()); // ✅ Dodajemy obsługę CORS
+app.use(express.urlencoded({ extended: true }));
 
 // 📌 Import tras API
-const employeeRoutes = require("./routes/employees");
+const employeeRoutes = require("./routes/employees.js");
 const clothingRoutes = require("./routes/clothing");
 const routes = require("./routes/routes");
 const clothingTypeRoutes = require("./routes/clothingtype");

@@ -44,6 +44,7 @@ router.post("/add", async (req, res) => {
     const newEmployee = new Employee({
       firstName: req.body.firstName,
       lastName: req.body.lastName,
+      gender: req.body.gender, // ← DODAJ TO!
       department: req.body.department,
       position: req.body.position,
     });
@@ -60,18 +61,20 @@ router.post("/add", async (req, res) => {
 });
 
 // ✅ Edytowanie pracownika po ID
+// routes/employees.js
 router.put("/:id", async (req, res) => {
-  console.log(`✏️ Otrzymano żądanie PUT dla ID: ${req.params.id}`);
-  console.log("📦 Nowe dane:", req.body);
+  console.log(`✏️ Aktualizacja pracownika ID: ${req.params.id}`);
+  console.log("📤 Otrzymane dane:", req.body);
 
   try {
     const updatedEmployee = await Employee.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      { $set: req.body }, // 💥 Wymuszenie aktualizacji konkretnego pola
       { new: true, runValidators: true }
     );
 
     if (!updatedEmployee) {
+      console.error("❌ Pracownik nie znaleziony!");
       return res.status(404).json({ message: "Pracownik nie znaleziony!" });
     }
 
@@ -81,7 +84,7 @@ router.put("/:id", async (req, res) => {
       employee: updatedEmployee,
     });
   } catch (error) {
-    console.error("❌ Błąd edycji pracownika:", error);
+    console.error("❌ Błąd aktualizacji:", error);
     res.status(500).json({ message: "Błąd serwera", error: error.message });
   }
 });
