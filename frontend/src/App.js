@@ -4,7 +4,7 @@ import ClothingList from "./components/ClothingList";
 import ShortageReport from "./components/ShortageReport";
 import OrderSummary from "./components/OrderSummary";
 // import "./index.css";
-import "./styles.scss";
+import "./styles/styles.scss";
 
 function App() {
   return (
