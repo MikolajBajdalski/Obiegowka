@@ -31,6 +31,30 @@ router.post("/add", async (req, res) => {
   }
 });
 
+// ✅ Nowe: Aktualizacja limitu przydziału po position + clothingType
+router.put("/byPositionAndType", async (req, res) => {
+  const { position, clothingType, limit } = req.body;
+
+  try {
+    const updated = await ClothingAssignment.findOneAndUpdate(
+      { position, clothingType },
+      { limit },
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) {
+      return res
+        .status(404)
+        .json({ message: "Nie znaleziono przypisania do aktualizacji." });
+    }
+
+    res.json({ message: "Limit zaktualizowany.", assignment: updated });
+  } catch (error) {
+    console.error("❌ Błąd aktualizacji limitu:", error);
+    res.status(500).json({ message: "Błąd serwera", error: error.message });
+  }
+});
+
 // ✅ Edycja istniejącego wpisu (limit)
 router.put("/:id", async (req, res) => {
   try {
@@ -47,6 +71,43 @@ router.put("/:id", async (req, res) => {
     res.json({ message: "Przydział zaktualizowany!", assignment: updated });
   } catch (error) {
     console.error("❌ Błąd edycji przydziału:", error);
+    res.status(500).json({ message: "Błąd serwera", error: error.message });
+  }
+});
+
+// ✅ Nowe: Pobieranie przydziałów dla konkretnego stanowiska
+router.get("/position/:id", async (req, res) => {
+  try {
+    const assignments = await ClothingAssignment.find({
+      position: req.params.id,
+    })
+      .populate("clothingType")
+      .populate("position");
+    res.json(assignments);
+  } catch (error) {
+    console.error("❌ Błąd pobierania przydziałów dla stanowiska:", error);
+    res.status(500).json({ message: "Błąd serwera", error: error.message });
+  }
+});
+
+// ✅ Nowe: Usuwanie przypisania dla danego stanowiska i rodzaju ubrania
+router.delete("/byPositionAndType", async (req, res) => {
+  const { position, clothingType } = req.body;
+  try {
+    const deleted = await ClothingAssignment.findOneAndDelete({
+      position,
+      clothingType,
+    });
+
+    if (!deleted) {
+      return res
+        .status(404)
+        .json({ message: "Nie znaleziono przypisania do usunięcia." });
+    }
+
+    res.json({ message: "Przypisanie usunięte.", deleted });
+  } catch (error) {
+    console.error("❌ Błąd usuwania przypisania:", error);
     res.status(500).json({ message: "Błąd serwera", error: error.message });
   }
 });

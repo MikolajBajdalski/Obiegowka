@@ -2,58 +2,108 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 const ClothingAssignmentList = () => {
-  const [assignments, setAssignments] = useState([]);
-  const [clothingTypes, setClothingTypes] = useState([]);
   const [positions, setPositions] = useState([]);
-  const [newEntry, setNewEntry] = useState({
-    clothingType: "",
-    position: "",
-    limit: 0,
-  });
-  const [editId, setEditId] = useState(null);
-  const [editLimit, setEditLimit] = useState(0);
+  const [clothingTypes, setClothingTypes] = useState([]);
+  const [selectedPosition, setSelectedPosition] = useState("");
+  const [assignmentMap, setAssignmentMap] = useState({});
+  const [limitMap, setLimitMap] = useState({});
 
   useEffect(() => {
-    fetchData();
+    fetchInitialData();
   }, []);
 
-  const fetchData = async () => {
+  useEffect(() => {
+    if (selectedPosition) {
+      fetchAssignmentsForPosition(selectedPosition);
+    }
+  }, [selectedPosition]);
+
+  const fetchInitialData = async () => {
     try {
-      const [assignmentsRes, typesRes, positionsRes] = await Promise.all([
-        axios.get("http://localhost:5001/clothingassignments"),
+      const [typesRes, positionsRes] = await Promise.all([
         axios.get("http://localhost:5001/clothingtype"),
         axios.get("http://localhost:5001/positions"),
       ]);
-      setAssignments(assignmentsRes.data);
       setClothingTypes(typesRes.data);
       setPositions(positionsRes.data);
-    } catch (error) {
-      console.error("❌ Błąd pobierania danych:", error);
+    } catch (err) {
+      console.error("❌ Błąd ładowania danych początkowych:", err);
     }
   };
 
-  const handleAdd = async () => {
+  const fetchAssignmentsForPosition = async (positionId) => {
     try {
-      await axios.post(
-        "http://localhost:5001/clothingassignments/add",
-        newEntry
+      const res = await axios.get(
+        `http://localhost:5001/clothingassignments/position/${positionId}`
       );
-      setNewEntry({ clothingType: "", position: "", limit: 0 });
-      fetchData();
-    } catch (error) {
-      console.error("❌ Błąd dodawania przydziału:", error);
+      const map = {};
+      const limits = {};
+      res.data.forEach((a) => {
+        map[a.clothingType._id] = true;
+        limits[a.clothingType._id] = a.limit;
+      });
+      setAssignmentMap(map);
+      setLimitMap(limits);
+    } catch (err) {
+      console.error("❌ Błąd pobierania przypisań:", err);
     }
   };
 
-  const handleEdit = async (id) => {
+  const handleCheckboxChange = async (clothingTypeId, checked) => {
+    const payload = {
+      clothingType: clothingTypeId,
+      position: selectedPosition,
+    };
+
+    if (checked) {
+      try {
+        await axios.post("http://localhost:5001/clothingassignments/add", {
+          ...payload,
+          limit: 1,
+        });
+        setAssignmentMap((prev) => ({ ...prev, [clothingTypeId]: true }));
+        setLimitMap((prev) => ({ ...prev, [clothingTypeId]: 1 }));
+      } catch (err) {
+        console.error("❌ Błąd dodawania przydziału:", err);
+      }
+    } else {
+      try {
+        await axios.delete(
+          "http://localhost:5001/clothingassignments/byPositionAndType",
+          {
+            data: payload,
+          }
+        );
+        setAssignmentMap((prev) => {
+          const copy = { ...prev };
+          delete copy[clothingTypeId];
+          return copy;
+        });
+        setLimitMap((prev) => {
+          const copy = { ...prev };
+          delete copy[clothingTypeId];
+          return copy;
+        });
+      } catch (err) {
+        console.error("❌ Błąd usuwania przydziału:", err);
+      }
+    }
+  };
+
+  const updateLimit = async (clothingTypeId, delta) => {
+    const newLimit = Math.max(0, (limitMap[clothingTypeId] || 0) + delta);
     try {
-      await axios.put(`http://localhost:5001/clothingassignments/${id}`, {
-        limit: editLimit,
-      });
-      setEditId(null);
-      fetchData();
-    } catch (error) {
-      console.error("❌ Błąd edycji przydziału:", error);
+      const res = await axios.put(
+        `http://localhost:5001/clothingassignments/byPositionAndType`,
+        {
+          position: selectedPosition,
+          clothingType: clothingTypeId,
+          limit: newLimit,
+        }
+      );
+      setLimitMap((prev) => ({ ...prev, [clothingTypeId]: newLimit }));
+    } catch (err) {
+      console.error("❌ Błąd aktualizacji limitu:", err);
     }
   };
 
@@ -63,28 +113,11 @@ const ClothingAssignmentList = () => {
         Przydziały ubrań wg stanowiska
       </h2>
 
-      {/* FORMULARZ DODAWANIA */}
-      <div className="mb-6 space-y-2">
+      {/* WYBÓR STANOWISKA */}
+      <div className="mb-6">
         <select
-          value={newEntry.clothingType}
-          onChange={(e) =>
-            setNewEntry({ ...newEntry, clothingType: e.target.value })
-          }
-          className="w-full p-2 rounded bg-gray-700 text-white"
-        >
-          <option value="">-- Wybierz rodzaj ubrania --</option>
-          {clothingTypes.map((type) => (
-            <option key={type._id} value={type._id}>
-              {type.name}
-            </option>
-          ))}
-        </select>
-
-        <select
-          value={newEntry.position}
-          onChange={(e) =>
-            setNewEntry({ ...newEntry, position: e.target.value })
-          }
+          value={selectedPosition}
+          onChange={(e) => setSelectedPosition(e.target.value)}
           className="w-full p-2 rounded bg-gray-700 text-white"
         >
           <option value="">-- Wybierz stanowisko --</option>
@@ -94,85 +127,48 @@ const ClothingAssignmentList = () => {
             </option>
           ))}
         </select>
-
-        <input
-          type="number"
-          min={0}
-          value={newEntry.limit}
-          onChange={(e) =>
-            setNewEntry({ ...newEntry, limit: parseInt(e.target.value) })
-          }
-          className="w-full p-2 rounded bg-gray-700 text-white"
-          placeholder="Limit sztuk"
-        />
-
-        <button
-          onClick={handleAdd}
-          className="bg-green-500 px-4 py-2 rounded hover:bg-green-600"
-        >
-          Dodaj przydział
-        </button>
       </div>
 
-      {/* TABELA */}
-      <table className="w-full table-auto border bg-gray-800 rounded">
-        <thead className="bg-gray-700">
-          <tr>
-            <th className="px-4 py-2 text-left">Rodzaj ubrania</th>
-            <th className="px-4 py-2 text-left">Stanowisko</th>
-            <th className="px-4 py-2 text-left">Limit</th>
-            <th className="px-4 py-2 text-left">Akcje</th>
-          </tr>
-        </thead>
-        <tbody>
-          {assignments.map((item) => (
-            <tr key={item._id} className="border-t border-gray-700">
-              <td className="px-4 py-2">{item.clothingType?.name}</td>
-              <td className="px-4 py-2">{item.position?.name}</td>
-              <td className="px-4 py-2">
-                {editId === item._id ? (
-                  <input
-                    type="number"
-                    value={editLimit}
-                    onChange={(e) => setEditLimit(parseInt(e.target.value))}
-                    className="p-1 rounded bg-gray-700"
-                  />
-                ) : (
-                  item.limit
-                )}
-              </td>
-              <td className="px-4 py-2 space-x-2">
-                {editId === item._id ? (
-                  <>
-                    <button
-                      onClick={() => handleEdit(item._id)}
-                      className="bg-green-600 px-2 py-1 rounded"
-                    >
-                      Zapisz
-                    </button>
-                    <button
-                      onClick={() => setEditId(null)}
-                      className="bg-gray-600 px-2 py-1 rounded"
-                    >
-                      Anuluj
-                    </button>
-                  </>
-                ) : (
+      {/* LISTA UBRAŃ W SIATCE */}
+      {selectedPosition && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {clothingTypes.map((type) => (
+            <div
+              key={type._id}
+              className="bg-gray-800 p-4 rounded shadow flex flex-col justify-between"
+            >
+              <label className="flex items-center space-x-2 mb-2">
+                <input
+                  type="checkbox"
+                  checked={!!assignmentMap[type._id]}
+                  onChange={(e) =>
+                    handleCheckboxChange(type._id, e.target.checked)
+                  }
+                />
+                <span className="font-medium">{type.name}</span>
+              </label>
+              {assignmentMap[type._id] && (
+                <div className="flex items-center space-x-2 text-sm text-gray-400">
+                  <span>Limit:</span>
                   <button
-                    onClick={() => {
-                      setEditId(item._id);
-                      setEditLimit(item.limit);
-                    }}
-                    className="bg-blue-600 px-2 py-1 rounded"
+                    className="bg-gray-600 hover:bg-gray-500 px-2 rounded"
+                    onClick={() => updateLimit(type._id, -1)}
                   >
-                    Edytuj
+                    -
                   </button>
-                )}
-              </td>
-            </tr>
+                  <span>{limitMap[type._id]}</span>
+                  <button
+                    className="bg-gray-600 hover:bg-gray-500 px-2 rounded"
+                    onClick={() => updateLimit(type._id, 1)}
+                  >
+                    +
+                  </button>
+                </div>
+              )}
+            </div>
           ))}
-        </tbody>
-      </table>
+        </div>
+      )}
     </div>
   );
 };
