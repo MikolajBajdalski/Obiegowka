@@ -2,14 +2,16 @@ const mongoose = require("mongoose");
 
 const connectDB = async () => {
   try {
-    await mongoose.connect("mongodb://127.0.0.1:27017/obiegowka", {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log("✅ Połączono z bazą MongoDB");
+    await mongoose.connect(
+      "mongodb+srv://admin:admin123@odziez-robocza.yorvxwh.mongodb.net/?retryWrites=true&w=majority&appName=Odziez-robocza",
+      {
+        dbName: "odziez-robocza",
+      }
+    );
+    console.log("✅ Połączono z MongoDB Atlas");
   } catch (error) {
-    console.error("❌ Błąd połączenia z MongoDB:", error);
-    process.exit(1); // Zatrzymuje aplikację, jeśli nie można się połączyć
+    console.error("❌ Błąd połączenia z MongoDB Atlas:", error);
+    process.exit(1);
   }
 };
 
