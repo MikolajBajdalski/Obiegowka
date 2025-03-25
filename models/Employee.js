@@ -7,15 +7,6 @@ const EmployeeSchema = new mongoose.Schema({
   department: { type: String, enum: ["GAZY", "OKNA", "PPOŻ"], required: true },
   position: {
     type: String,
-    enum: [
-      "Pracownik biurowy",
-      "Handlowiec",
-      "Magazynier",
-      "Kierowca",
-      "Techniczny",
-      "Serwisant PPOŻ",
-      "Montażysta",
-    ],
     required: true,
   },
 });

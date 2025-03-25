@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 const EmployeeEditForm = ({ employee, onCancel, onSave }) => {
@@ -11,8 +11,23 @@ const EmployeeEditForm = ({ employee, onCancel, onSave }) => {
     lastName: employee.lastName || "",
     gender: employee.gender || "Mężczyzna",
     department: employee.department || "GAZY",
-    position: employee.position || "Pracownik biurowy",
+    position: employee.position || "",
   });
+
+  const [positions, setPositions] = useState([]);
+
+  useEffect(() => {
+    const fetchPositions = async () => {
+      try {
+        const response = await axios.get("http://localhost:5001/positions");
+        setPositions(response.data);
+      } catch (error) {
+        console.error("❌ Błąd pobierania stanowisk:", error);
+      }
+    };
+
+    fetchPositions();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -100,13 +115,14 @@ const EmployeeEditForm = ({ employee, onCancel, onSave }) => {
               className="w-full border p-2 bg-gray-700 text-white rounded"
               required
             >
-              <option value="Pracownik biurowy">Pracownik biurowy</option>
-              <option value="Handlowiec">Handlowiec</option>
-              <option value="Magazynier">Magazynier</option>
-              <option value="Kierowca">Kierowca</option>
-              <option value="Techniczny">Techniczny</option>
-              <option value="Serwisant PPOŻ">Serwisant PPOŻ</option>
-              <option value="Montażysta">Montażysta</option>
+              <option value="" disabled>
+                -- Wybierz stanowisko --
+              </option>
+              {positions.map((pos) => (
+                <option key={pos._id} value={pos.name}>
+                  {pos.name}
+                </option>
+              ))}
             </select>
           </div>
 

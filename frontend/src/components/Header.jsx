@@ -21,6 +21,21 @@ const Header = () => {
           <Link to="/clothing" className={navLinkClass("/clothing")}>
             Magazyn ubrań
           </Link>
+          <Link to="/positions" className={navLinkClass("/positions")}>
+            Stanowiska
+          </Link>
+          <Link
+            to="/clothing-types"
+            className={navLinkClass("/clothing-types")}
+          >
+            Rodzaje ubrań
+          </Link>
+          <Link
+            to="/clothing-assignments"
+            className={navLinkClass("/clothing-assignments")}
+          >
+            Przydziały ubrań
+          </Link>
         </nav>
       </div>
     </header>

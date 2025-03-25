@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 
 const ClothingTypeSchema = new mongoose.Schema({
-  type: { type: String, required: true, unique: true }, // np. "Kurtka", "Spodnie", "Buty"
-  limit: { type: Number, required: true, min: 1 }, // Minimalnie 1 sztuka
+  name: { type: String, required: true }, // np. "Spodnie", "Kurtka"
+  requiresDepartmentColor: { type: Boolean, default: true }, // np. buty nie muszą mieć kolorów zależnych od działu
 });
 
 module.exports = mongoose.model("ClothingType", ClothingTypeSchema);
