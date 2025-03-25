@@ -89,7 +89,7 @@ router.get("/order", async (req, res) => {
 
   try {
     // Pobieramy raport braków
-    const shortageResponse = await fetch(`${API_URL}/clothing/shortage`);
+    const shortageResponse = await fetch(`${API_URL}clothing/shortage`);
     const shortageData = await shortageResponse.json();
 
     let orderSummary = {};
