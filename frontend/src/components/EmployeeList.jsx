@@ -78,13 +78,19 @@ const EmployeeList = () => {
                 <td className="px-4 py-2">{employee.gender}</td>
                 <td className="px-4 py-2">{employee.department}</td>
                 <td className="px-4 py-2">{employee.position}</td>
-                <td className="px-4 py-2">
+                <td className="px-4 py-2 space-x-2">
                   <button
                     onClick={() => handleEdit(employee)}
                     className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
                   >
                     Edytuj
                   </button>
+                  <Link
+                    to={`/employee/${employee._id}`}
+                    className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded"
+                  >
+                    Karta pracownika
+                  </Link>
                 </td>
               </tr>
             ))}

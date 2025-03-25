@@ -1,46 +1,195 @@
-// src/components/EmployeeDetails.jsx
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 
 const EmployeeDetails = () => {
-  const { id } = useParams(); // Pobieramy id z URL
+  const { id } = useParams();
   const [employee, setEmployee] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [assignments, setAssignments] = useState([]);
+  const [clothingList, setClothingList] = useState([]);
+  const [existingClothingData, setExistingClothingData] = useState([]);
 
   useEffect(() => {
-    const fetchEmployee = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:5001/employees/${id}`
-        );
-        setEmployee(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError("Nie udało się pobrać danych pracownika.");
-        setLoading(false);
-      }
-    };
-
     fetchEmployee();
-  }, [id]); // Odświeżaj dane po zmianie id w URL
+    fetchAssignments();
+    fetchExistingClothing();
+  }, [id]);
 
-  if (loading) {
-    return <div>Ładowanie...</div>;
-  }
+  const fetchEmployee = async () => {
+    try {
+      const res = await axios.get(`http://localhost:5001/employees/${id}`);
+      setEmployee(res.data);
+    } catch (err) {
+      console.error("Błąd ładowania pracownika:", err);
+    }
+  };
 
-  if (error) {
-    return <div>{error}</div>;
-  }
+  const fetchAssignments = async () => {
+    try {
+      const res = await axios.get("http://localhost:5001/clothingassignments");
+      setAssignments(res.data);
+    } catch (err) {
+      console.error("Błąd ładowania przydziałów:", err);
+    }
+  };
+
+  const fetchExistingClothing = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5001/employeeclothing/employee/${id}`
+      );
+      setExistingClothingData(res.data);
+    } catch (err) {
+      console.error("Błąd ładowania danych odzieżowych pracownika:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (employee && assignments.length > 0) {
+      generateClothingList();
+    }
+  }, [employee, assignments, existingClothingData]);
+
+  const generateClothingList = () => {
+    const filtered = assignments.filter(
+      (a) => a.position.name === employee.position
+    );
+
+    const prepared = filtered.map((entry) => {
+      const existing = existingClothingData.find(
+        (e) => e.clothingType._id === entry.clothingType._id
+      );
+
+      return {
+        clothingTypeId: entry.clothingType._id,
+        name: entry.clothingType.name,
+        requiresDepartmentColor: entry.clothingType.requiresDepartmentColor,
+        departmentColor: entry.clothingType.requiresDepartmentColor
+          ? employee.department
+          : "Brak",
+        gender: employee.gender,
+        size: existing?.size || "",
+        entitled: entry.limit,
+        owned: existing?.quantity || 0,
+        recordId: existing?._id || null,
+      };
+    });
+
+    setClothingList(prepared);
+  };
+
+  const handleInputChange = (index, field, value) => {
+    const updated = [...clothingList];
+    updated[index][field] = value;
+    setClothingList(updated);
+  };
+
+  const handleSave = async () => {
+    try {
+      for (const item of clothingList) {
+        const payload = {
+          employee: id,
+          clothingType: item.clothingTypeId,
+          size: item.size,
+          quantity: item.owned ?? 0,
+        };
+
+        if (item.recordId) {
+          await axios.put(
+            `http://localhost:5001/employeeclothing/${item.recordId}`,
+            payload
+          );
+        } else {
+          await axios.post(
+            "http://localhost:5001/employeeclothing/add",
+            payload
+          );
+        }
+      }
+      alert("Zapisano dane pracownika.");
+    } catch (error) {
+      console.error("Błąd zapisu odzieży pracownika:", error);
+    }
+  };
+
+  if (!employee) return <div className="text-white p-4">Ładowanie...</div>;
 
   return (
-    <div>
-      <h1>
-        {employee.firstName} {employee.lastName}
-      </h1>
-      <p>Stanowisko: {employee.position}</p>
-      <p>Dział: {employee.department}</p>
+    <div className="text-white p-6">
+      <h2 className="text-2xl font-bold mb-4">Karta pracownika</h2>
+      <div className="mb-4">
+        <p>
+          <strong>Imię:</strong> {employee.firstName}
+        </p>
+        <p>
+          <strong>Nazwisko:</strong> {employee.lastName}
+        </p>
+        <p>
+          <strong>Płeć:</strong> {employee.gender}
+        </p>
+        <p>
+          <strong>Dział:</strong> {employee.department}
+        </p>
+        <p>
+          <strong>Stanowisko:</strong> {employee.position}
+        </p>
+      </div>
+
+      <table className="w-full table-auto border bg-gray-800 rounded">
+        <thead className="bg-gray-700">
+          <tr>
+            <th className="px-4 py-2 text-left">Rodzaj ubrania</th>
+            <th className="px-4 py-2 text-left">Kolor ubrania</th>
+            <th className="px-4 py-2 text-left">Płeć</th>
+            <th className="px-4 py-2 text-left">Rozmiar</th>
+            <th className="px-4 py-2 text-left">Ilość przysługująca</th>
+            <th className="px-4 py-2 text-left">Ilość posiadana</th>
+          </tr>
+        </thead>
+        <tbody>
+          {clothingList.map((item, index) => (
+            <tr key={index} className="border-t border-gray-700">
+              <td className="px-4 py-2">{item.name}</td>
+              <td className="px-4 py-2">{item.departmentColor}</td>
+              <td className="px-4 py-2">{item.gender}</td>
+              <td className="px-4 py-2">
+                <input
+                  type="text"
+                  value={item.size}
+                  onChange={(e) =>
+                    handleInputChange(index, "size", e.target.value)
+                  }
+                  className="w-full p-1 bg-gray-700 rounded"
+                />
+              </td>
+              <td className="px-4 py-2">{item.entitled}</td>
+              <td className="px-4 py-2">
+                <input
+                  type="number"
+                  value={item.owned}
+                  onChange={(e) =>
+                    handleInputChange(
+                      index,
+                      "owned",
+                      parseInt(e.target.value) || 0
+                    )
+                  }
+                  className="w-full p-1 bg-gray-700 rounded"
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <div className="mt-4 text-right">
+        <button
+          onClick={handleSave}
+          className="bg-green-600 px-4 py-2 rounded hover:bg-green-700"
+        >
+          Zapisz zmiany
+        </button>
+      </div>
     </div>
   );
 };

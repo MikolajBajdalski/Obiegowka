@@ -4,7 +4,6 @@ import "./index.css";
 import Header from "./components/Header";
 import EmployeeList from "./components/EmployeeList";
 import EmployeeDetails from "./components/EmployeeDetails";
-// import ClothingWarehouse from "./components/ClothingWarehouse";
 import PositionList from "./components/PositionList";
 import ClothingTypeList from "./components/ClothingTypeList";
 import ClothingAssignmentList from "./components/ClothingAssignmentList";
@@ -19,7 +18,6 @@ function App() {
             <Routes>
               <Route path="/employees" element={<EmployeeList />} />
               <Route path="/employee/:id" element={<EmployeeDetails />} />
-              {/* <Route path="/clothing" element={<ClothingWarehouse />} /> */}
               <Route path="/positions" element={<PositionList />} /> {/* 🆕 */}
               <Route path="/clothing-types" element={<ClothingTypeList />} />
               <Route

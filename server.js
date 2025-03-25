@@ -20,6 +20,7 @@ const clothingTypeRoutes = require("./routes/clothingTypes");
 const positionRoutes = require("./routes/positions");
 const rootRoutes = require("./routes/routes"); // ← trasa rootowa
 const clothingAssignmentRoutes = require("./routes/clothingAssignments");
+const employeeClothingRoutes = require("./routes/employeeClothing");
 
 // ✅ Rejestracja tras
 console.log("✅ Rejestruję trasę: /employees");
@@ -36,8 +37,12 @@ app.use("/positions", positionRoutes);
 
 console.log("✅ Rejestruję trasę: /");
 app.use("/", rootRoutes);
+
 console.log("✅ Rejestruję trasę: /clothingassignments");
 app.use("/clothingassignments", clothingAssignmentRoutes);
+
+console.log("✅ Rejestruję trasę: /employeeClothing");
+app.use("/employeeclothing", employeeClothingRoutes);
 
 // 🚀 Start serwera
 app.listen(PORT, () => {
