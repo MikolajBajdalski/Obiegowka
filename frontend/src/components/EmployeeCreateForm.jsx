@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import API_URL from "../api";
 
 const EmployeeCreateForm = ({ onCancel, onSave }) => {
   const [formData, setFormData] = useState({
@@ -15,7 +16,7 @@ const EmployeeCreateForm = ({ onCancel, onSave }) => {
   useEffect(() => {
     const fetchPositions = async () => {
       try {
-        const response = await axios.get("http://localhost:5001/positions");
+        const response = await axios.get(`${API_URL}/positions`);
         setPositions(response.data);
       } catch (error) {
         console.error("❌ Błąd pobierania stanowisk:", error);
@@ -35,10 +36,7 @@ const EmployeeCreateForm = ({ onCancel, onSave }) => {
     console.log("📤 Wysyłam dane do API:", formData);
 
     try {
-      const response = await axios.post(
-        "http://localhost:5001/employees/add",
-        formData
-      );
+      const response = await axios.post(`${API_URL}/employees/add`, formData);
       console.log("✅ Pracownik dodany:", response.data);
       onSave();
     } catch (error) {

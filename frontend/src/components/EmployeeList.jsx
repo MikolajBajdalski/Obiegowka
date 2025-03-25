@@ -3,6 +3,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import EmployeeCreateForm from "./EmployeeCreateForm"; // Formularz do dodawania
 import EmployeeEditForm from "./EmployeeEditForm"; // Formularz do edycji
+import API_URL from "../api";
 
 const EmployeeList = () => {
   const [employees, setEmployees] = useState([]);
@@ -17,7 +18,7 @@ const EmployeeList = () => {
 
   const fetchEmployees = async () => {
     try {
-      const response = await axios.get("http://localhost:5001/employees");
+      const response = await axios.get(`${API_URL}/employees`);
       setEmployees(response.data);
     } catch (err) {
       setError("Nie udało się pobrać danych.");

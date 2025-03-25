@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import API_URL from "../api";
 
 const ClothingAssignmentList = () => {
   const [positions, setPositions] = useState([]);
@@ -21,8 +22,8 @@ const ClothingAssignmentList = () => {
   const fetchInitialData = async () => {
     try {
       const [typesRes, positionsRes] = await Promise.all([
-        axios.get("http://localhost:5001/clothingtype"),
-        axios.get("http://localhost:5001/positions"),
+        axios.get(`${API_URL}/clothingtype`),
+        axios.get(`${API_URL}/positions`),
       ]);
       setClothingTypes(typesRes.data);
       setPositions(positionsRes.data);
@@ -34,7 +35,7 @@ const ClothingAssignmentList = () => {
   const fetchAssignmentsForPosition = async (positionId) => {
     try {
       const res = await axios.get(
-        `http://localhost:5001/clothingassignments/position/${positionId}`
+        `${API_URL}/clothingassignments/position/${positionId}`
       );
       const map = {};
       const limits = {};
@@ -57,7 +58,7 @@ const ClothingAssignmentList = () => {
 
     if (checked) {
       try {
-        await axios.post("http://localhost:5001/clothingassignments/add", {
+        await axios.post(`${API_URL}/clothingassignments/add`, {
           ...payload,
           limit: 1,
         });
@@ -68,12 +69,9 @@ const ClothingAssignmentList = () => {
       }
     } else {
       try {
-        await axios.delete(
-          "http://localhost:5001/clothingassignments/byPositionAndType",
-          {
-            data: payload,
-          }
-        );
+        await axios.delete(`${API_URL}/clothingassignments/byPositionAndType`, {
+          data: payload,
+        });
         setAssignmentMap((prev) => {
           const copy = { ...prev };
           delete copy[clothingTypeId];
@@ -94,7 +92,7 @@ const ClothingAssignmentList = () => {
     const newLimit = Math.max(0, (limitMap[clothingTypeId] || 0) + delta);
     try {
       const res = await axios.put(
-        `http://localhost:5001/clothingassignments/byPositionAndType`,
+        `${API_URL}/clothingassignments/byPositionAndType`,
         {
           position: selectedPosition,
           clothingType: clothingTypeId,

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import API_URL from "../api";
 
 const ClothingSummary = () => {
   const [summary, setSummary] = useState([]);
@@ -8,9 +9,7 @@ const ClothingSummary = () => {
   useEffect(() => {
     const fetchSummary = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:5001/clothingassignments/summary"
-        );
+        const res = await axios.get(`${API_URL}/clothingassignments/summary`);
         setSummary(res.data);
       } catch (err) {
         console.error("❌ Błąd pobierania zestawienia:", err);
