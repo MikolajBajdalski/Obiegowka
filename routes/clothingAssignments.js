@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const ClothingAssignment = require("../models/ClothingAssignment");
+const Employee = require("../models/Employee");
+const EmployeeClothing = require("../models/EmployeeClothing");
+const ClothingType = require("../models/ClothingType");
 
 // ✅ Pobieranie wszystkich wpisów przydziałów
 router.get("/", async (req, res) => {
@@ -108,6 +111,73 @@ router.delete("/byPositionAndType", async (req, res) => {
     res.json({ message: "Przypisanie usunięte.", deleted });
   } catch (error) {
     console.error("❌ Błąd usuwania przypisania:", error);
+    res.status(500).json({ message: "Błąd serwera", error: error.message });
+  }
+});
+
+// ✅ Nowe: Zestawienie zapotrzebowania
+router.get("/summary", async (req, res) => {
+  try {
+    const allEmployees = await Employee.find();
+    const allAssignments = await ClothingAssignment.find().populate(
+      "clothingType position"
+    );
+    const allClothing = await ClothingType.find();
+    const allEmployeeClothing = await EmployeeClothing.find().populate(
+      "employee clothingType"
+    );
+
+    const needs = {};
+
+    allEmployees.forEach((employee) => {
+      const position = employee.position;
+      const gender = employee.gender;
+      const department = employee.department;
+
+      const employeeAssignments = allAssignments.filter(
+        (a) => a.position.name === position
+      );
+
+      employeeAssignments.forEach((assignment) => {
+        const clothingType = assignment.clothingType;
+        const limit = assignment.limit;
+
+        const ownedRecord = allEmployeeClothing.find(
+          (ec) =>
+            ec.employee._id.toString() === employee._id.toString() &&
+            ec.clothingType._id.toString() === clothingType._id.toString()
+        );
+
+        const ownedQty = ownedRecord ? ownedRecord.quantity : 0;
+        const missing = Math.max(limit - ownedQty, 0);
+
+        if (missing > 0) {
+          const color = clothingType.requiresDepartmentColor
+            ? department
+            : "Brak";
+          const size = ownedRecord?.size || "Brak";
+
+          const key = `${clothingType.name}_${color}_${size}_${gender}`;
+
+          if (!needs[key]) {
+            needs[key] = {
+              clothingType: clothingType.name,
+              color,
+              size,
+              gender,
+              quantity: 0,
+            };
+          }
+
+          needs[key].quantity += missing;
+        }
+      });
+    });
+
+    const result = Object.values(needs);
+    res.json(result);
+  } catch (error) {
+    console.error("❌ Błąd generowania zestawienia:", error);
     res.status(500).json({ message: "Błąd serwera", error: error.message });
   }
 });

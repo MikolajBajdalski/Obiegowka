@@ -112,6 +112,11 @@ const ClothingAssignmentList = () => {
       <h2 className="text-2xl font-bold mb-4">
         Przydziały ubrań wg stanowiska
       </h2>
+      <p className="text-red-500 font-bold">
+        UWAGA ! PO ODZNACZENIU CHECKBOXA ZRESETUJE SIĘ WARTOŚĆ LIMITU. JEŚLI
+        PONOWNIE GO ZAZNACZYSZ POJAWI SIĘ DOMYŚLNA WARTOŚĆ 1 ! NIE POZBYWAJ SIĘ
+        TABELI Z ROZPISKĄ !!!
+      </p>
 
       {/* WYBÓR STANOWISKA */}
       <div className="mb-6">

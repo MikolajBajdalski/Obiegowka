@@ -13,13 +13,10 @@ const Header = () => {
   return (
     <header className="bg-gray-900 text-white shadow-md">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        <h1 className="text-xl font-bold text-white">Obiegówka</h1>
+        <h1 className="text-xl font-bold text-white">Odzież robocza</h1>
         <nav className="flex space-x-4">
           <Link to="/employees" className={navLinkClass("/employees")}>
             Lista pracowników
-          </Link>
-          <Link to="/clothing" className={navLinkClass("/clothing")}>
-            Magazyn ubrań
           </Link>
           <Link to="/positions" className={navLinkClass("/positions")}>
             Stanowiska
@@ -35,6 +32,9 @@ const Header = () => {
             className={navLinkClass("/clothing-assignments")}
           >
             Przydziały ubrań
+          </Link>
+          <Link to="/demand" className={navLinkClass("/zapotrzebowanie")}>
+            Zapotrzebowanie
           </Link>
         </nav>
       </div>
