@@ -9,7 +9,7 @@ const ClothingSummary = () => {
   useEffect(() => {
     const fetchSummary = async () => {
       try {
-        const res = await axios.get(`${API_URL}/clothingassignments/summary`);
+        const res = await axios.get(`${API_URL}clothingassignments/summary`);
         setSummary(res.data);
       } catch (err) {
         console.error("❌ Błąd pobierania zestawienia:", err);

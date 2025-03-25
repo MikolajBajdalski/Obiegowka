@@ -18,7 +18,7 @@ const EmployeeDetails = () => {
 
   const fetchEmployee = async () => {
     try {
-      const res = await axios.get(`${API_URL}/employees/${id}`);
+      const res = await axios.get(`${API_URL}employees/${id}`);
       setEmployee(res.data);
     } catch (err) {
       console.error("Błąd ładowania pracownika:", err);
@@ -27,7 +27,7 @@ const EmployeeDetails = () => {
 
   const fetchAssignments = async () => {
     try {
-      const res = await axios.get(`${API_URL}/clothingassignments`);
+      const res = await axios.get(`${API_URL}clothingassignments`);
       setAssignments(res.data);
     } catch (err) {
       console.error("Błąd ładowania przydziałów:", err);
@@ -36,7 +36,7 @@ const EmployeeDetails = () => {
 
   const fetchExistingClothing = async () => {
     try {
-      const res = await axios.get(`${API_URL}/employeeclothing/employee/${id}`);
+      const res = await axios.get(`${API_URL}employeeclothing/employee/${id}`);
       setExistingClothingData(res.data);
     } catch (err) {
       console.error("Błąd ładowania danych odzieżowych pracownika:", err);
@@ -95,11 +95,11 @@ const EmployeeDetails = () => {
 
         if (item.recordId) {
           await axios.put(
-            `${API_URL}/employeeclothing/${item.recordId}`,
+            `${API_URL}employeeclothing/${item.recordId}`,
             payload
           );
         } else {
-          await axios.post(`${API_URL}/employeeclothing/add`, payload);
+          await axios.post(`${API_URL}employeeclothing/add`, payload);
         }
       }
       alert("Zapisano dane pracownika.");

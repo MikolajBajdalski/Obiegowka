@@ -20,7 +20,7 @@ const EmployeeEditForm = ({ employee, onCancel, onSave }) => {
   useEffect(() => {
     const fetchPositions = async () => {
       try {
-        const response = await axios.get(`${API_URL}/positions`);
+        const response = await axios.get(`${API_URL}positions`);
         setPositions(response.data);
       } catch (error) {
         console.error("❌ Błąd pobierania stanowisk:", error);
@@ -40,7 +40,7 @@ const EmployeeEditForm = ({ employee, onCancel, onSave }) => {
 
     try {
       const response = await axios.put(
-        `${API_URL}/employees/${employee._id}`,
+        `${API_URL}employees/${employee._id}`,
         formData
       );
       console.log("✅ Odpowiedź API:", response.data);

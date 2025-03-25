@@ -16,7 +16,7 @@ const EmployeeCreateForm = ({ onCancel, onSave }) => {
   useEffect(() => {
     const fetchPositions = async () => {
       try {
-        const response = await axios.get(`${API_URL}/positions`);
+        const response = await axios.get(`${API_URL}positions`);
         setPositions(response.data);
       } catch (error) {
         console.error("❌ Błąd pobierania stanowisk:", error);
@@ -36,7 +36,7 @@ const EmployeeCreateForm = ({ onCancel, onSave }) => {
     console.log("📤 Wysyłam dane do API:", formData);
 
     try {
-      const response = await axios.post(`${API_URL}/employees/add`, formData);
+      const response = await axios.post(`${API_URL}employees/add`, formData);
       console.log("✅ Pracownik dodany:", response.data);
       onSave();
     } catch (error) {

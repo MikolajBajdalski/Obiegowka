@@ -20,7 +20,7 @@ const ClothingTypeList = () => {
 
   const fetchClothingTypes = async () => {
     try {
-      const response = await axios.get(`${API_URL}/clothingtype`);
+      const response = await axios.get(`${API_URL}clothingtype`);
       setClothingTypes(response.data);
     } catch (error) {
       console.error("Błąd pobierania rodzajów ubrań:", error);
@@ -29,7 +29,7 @@ const ClothingTypeList = () => {
 
   const handleAdd = async () => {
     try {
-      await axios.post(`${API_URL}/clothingtype/add`, newType);
+      await axios.post(`${API_URL}clothingtype/add`, newType);
       fetchClothingTypes();
       setNewType({ name: "", requiresDepartmentColor: true });
     } catch (error) {
@@ -40,7 +40,7 @@ const ClothingTypeList = () => {
   const handleEdit = async (id) => {
     try {
       const response = await axios.put(
-        `${API_URL}/clothingtype/${id}`,
+        `${API_URL}clothingtype/${id}`,
         editValues
       );
       setClothingTypes(

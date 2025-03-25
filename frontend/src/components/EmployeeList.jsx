@@ -18,7 +18,7 @@ const EmployeeList = () => {
 
   const fetchEmployees = async () => {
     try {
-      const response = await axios.get(`${API_URL}/employees`);
+      const response = await axios.get(`${API_URL}employees`);
       setEmployees(response.data);
     } catch (err) {
       setError("Nie udało się pobrać danych.");

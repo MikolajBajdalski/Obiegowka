@@ -22,8 +22,8 @@ const ClothingAssignmentList = () => {
   const fetchInitialData = async () => {
     try {
       const [typesRes, positionsRes] = await Promise.all([
-        axios.get(`${API_URL}/clothingtype`),
-        axios.get(`${API_URL}/positions`),
+        axios.get(`${API_URL}clothingtype`),
+        axios.get(`${API_URL}positions`),
       ]);
       setClothingTypes(typesRes.data);
       setPositions(positionsRes.data);
@@ -35,7 +35,7 @@ const ClothingAssignmentList = () => {
   const fetchAssignmentsForPosition = async (positionId) => {
     try {
       const res = await axios.get(
-        `${API_URL}/clothingassignments/position/${positionId}`
+        `${API_URL}clothingassignments/position/${positionId}`
       );
       const map = {};
       const limits = {};
@@ -58,7 +58,7 @@ const ClothingAssignmentList = () => {
 
     if (checked) {
       try {
-        await axios.post(`${API_URL}/clothingassignments/add`, {
+        await axios.post(`${API_URL}clothingassignments/add`, {
           ...payload,
           limit: 1,
         });
@@ -69,7 +69,7 @@ const ClothingAssignmentList = () => {
       }
     } else {
       try {
-        await axios.delete(`${API_URL}/clothingassignments/byPositionAndType`, {
+        await axios.delete(`${API_URL}clothingassignments/byPositionAndType`, {
           data: payload,
         });
         setAssignmentMap((prev) => {
@@ -92,7 +92,7 @@ const ClothingAssignmentList = () => {
     const newLimit = Math.max(0, (limitMap[clothingTypeId] || 0) + delta);
     try {
       const res = await axios.put(
-        `${API_URL}/clothingassignments/byPositionAndType`,
+        `${API_URL}clothingassignments/byPositionAndType`,
         {
           position: selectedPosition,
           clothingType: clothingTypeId,

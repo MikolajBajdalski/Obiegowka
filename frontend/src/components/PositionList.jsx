@@ -11,7 +11,7 @@ const PositionList = () => {
 
   const fetchPositions = async () => {
     try {
-      const res = await axios.get(`${API_URL}/positions`);
+      const res = await axios.get(`${API_URL}positions`);
       setPositions(res.data);
     } catch (err) {
       console.error("Błąd pobierania stanowisk:", err);
@@ -25,7 +25,7 @@ const PositionList = () => {
   const handleAdd = async () => {
     if (!newPosition.trim()) return;
     try {
-      await axios.post(`${API_URL}/positions/add`, {
+      await axios.post(`${API_URL}positions/add`, {
         name: newPosition.trim(),
       });
       setNewPosition("");
@@ -37,7 +37,7 @@ const PositionList = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${API_URL}/positions/${id}`);
+      await axios.delete(`${API_URL}positions/${id}`);
       fetchPositions();
     } catch (err) {
       console.error("Błąd usuwania:", err);
@@ -46,7 +46,7 @@ const PositionList = () => {
 
   const handleEdit = async (id) => {
     try {
-      await axios.put(`${API_URL}/positions/${id}`, {
+      await axios.put(`${API_URL}positions/${id}`, {
         name: editingValue.trim(),
       });
       setEditingId(null);
