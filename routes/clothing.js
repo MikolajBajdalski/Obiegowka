@@ -3,7 +3,6 @@ const router = express.Router();
 const Clothing = require("../models/Clothing");
 const Employee = require("../models/Employee");
 const ClothingType = require("../models/ClothingType");
-import API_URL from "../api";
 
 // ✅ Dodawanie nowego ubrania do systemu
 router.post("/add", async (req, res) => {
@@ -89,7 +88,9 @@ router.get("/order", async (req, res) => {
 
   try {
     // Pobieramy raport braków
-    const shortageResponse = await fetch(`${API_URL}clothing/shortage`);
+    const shortageResponse = await fetch(
+      "https://obiegowka-backend.onrender.com/clothing/shortage"
+    );
     const shortageData = await shortageResponse.json();
 
     let orderSummary = {};
