@@ -138,8 +138,8 @@ const ClothingSummary = () => {
         return "bg-gray-500 text-white";
       case "PPOŻ":
         return "bg-red-600 text-white";
-      case "Brak":
-        return "bg-white text-black";
+      // case "Brak":
+      //   return "bg-white text-black";
       default:
         return "";
     }
