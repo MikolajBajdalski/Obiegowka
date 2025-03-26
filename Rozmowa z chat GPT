@@ -1,0 +1,22 @@
+✅ KROK 4: Wysyłka na produkcję
+Gdy skończysz testy na develop i jesteś pewny, że wszystko działa:
+
+Przełącz się na master:
+
+bash
+Kopiuj
+Edytuj
+git checkout master
+Połącz zmiany z develop:
+
+bash
+Kopiuj
+Edytuj
+git merge develop
+Wypchnij na GitHub:
+
+bash
+Kopiuj
+Edytuj
+git push origin master
+Render/Netlify zrobią deploy 🎉

@@ -1,12 +1,17 @@
+// 🛠️ Załaduj zmienne środowiskowe z pliku .env
+require("dotenv").config(); // ← DODANE!
+
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
 
 const app = express();
-const PORT = 5001;
 
-// 🔗 Połączenie z MongoDB
-connectDB();
+// 🔧 Pobierz PORT z .env lub użyj domyślnego 5001
+const PORT = process.env.PORT || 5001;
+
+// 🔗 Połączenie z MongoDB z .env
+connectDB(); // on już używa process.env.MONGODB_URI w pliku config/db.js
 
 // 🛠️ Middleware
 app.use(cors());
@@ -18,7 +23,7 @@ const employeeRoutes = require("./routes/employees");
 const clothingRoutes = require("./routes/clothing");
 const clothingTypeRoutes = require("./routes/clothingTypes");
 const positionRoutes = require("./routes/positions");
-const rootRoutes = require("./routes/routes"); // ← trasa rootowa
+const rootRoutes = require("./routes/routes");
 const clothingAssignmentRoutes = require("./routes/clothingAssignments");
 const employeeClothingRoutes = require("./routes/employeeClothing");
 
