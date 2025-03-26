@@ -2,15 +2,19 @@ const mongoose = require("mongoose");
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(
-      "mongodb+srv://admin:admin123@odziez-robocza.yorvxwh.mongodb.net/?retryWrites=true&w=majority&appName=Odziez-robocza",
-      {
-        dbName: "odziez-robocza",
-      }
-    );
+    const mongoURI = process.env.MONGO_URI;
+
+    if (!mongoURI) {
+      throw new Error("❌ Brak zmiennej środowiskowej MONGO_URI!");
+    }
+
+    await mongoose.connect(mongoURI, {
+      dbName: "odziez-robocza",
+    });
+
     console.log("✅ Połączono z MongoDB Atlas");
   } catch (error) {
-    console.error("❌ Błąd połączenia z MongoDB Atlas:", error);
+    console.error("❌ Błąd połączenia z MongoDB:", error);
     process.exit(1);
   }
 };
