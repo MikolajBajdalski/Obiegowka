@@ -1,4 +1,3 @@
-// src/components/Header.jsx
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -33,8 +32,11 @@ const Header = () => {
           >
             Przydziały ubrań
           </Link>
-          <Link to="/demand" className={navLinkClass("/zapotrzebowanie")}>
+          <Link to="/demand" className={navLinkClass("/demand")}>
             Zapotrzebowanie
+          </Link>
+          <Link to="/warehouse" className={navLinkClass("/warehouse")}>
+            Magazyn ubrań
           </Link>
         </nav>
       </div>
