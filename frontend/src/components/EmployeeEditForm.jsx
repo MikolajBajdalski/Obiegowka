@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import API_URL from "../api";
+import DEPARTMENTS from "../constants/departments"; // Import listy działów
 
 const EmployeeEditForm = ({ employee, onCancel, onSave }) => {
   if (!employee) {
@@ -101,9 +102,11 @@ const EmployeeEditForm = ({ employee, onCancel, onSave }) => {
               className="w-full border p-2 bg-gray-700 text-white rounded"
               required
             >
-              <option value="GAZY">GAZY</option>
-              <option value="OKNA">OKNA</option>
-              <option value="PPOŻ">PPOŻ</option>
+              {DEPARTMENTS.map((dept) => (
+                <option key={dept.name} value={dept.name}>
+                  {dept.name}
+                </option>
+              ))}
             </select>
           </div>
 

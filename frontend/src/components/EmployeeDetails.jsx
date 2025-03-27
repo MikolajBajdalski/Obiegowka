@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import Select from "react-select"; // Import react-select
 import API_URL from "../api";
+import { CLOTHING_SIZES, SHOE_SIZES } from "../constants/sizes"; // Import rozmiarów
 
 const EmployeeDetails = () => {
   const { id } = useParams();
@@ -9,6 +11,44 @@ const EmployeeDetails = () => {
   const [assignments, setAssignments] = useState([]);
   const [clothingList, setClothingList] = useState([]);
   const [existingClothingData, setExistingClothingData] = useState([]);
+
+  const customStyles = {
+    control: (provided) => ({
+      ...provided,
+      backgroundColor: "#374151", // Ciemnoszary (Tailwind: bg-gray-700)
+      borderColor: "#4B5563", // Szary (Tailwind: border-gray-600)
+      color: "#FFFFFF", // Biały tekst
+      boxShadow: "none",
+      "&:hover": {
+        borderColor: "#6B7280", // Jaśniejszy szary (Tailwind: border-gray-500)
+      },
+    }),
+    menu: (provided) => ({
+      ...provided,
+      backgroundColor: "#1F2937", // Bardzo ciemnoszary (Tailwind: bg-gray-800)
+      color: "#FFFFFF", // Biały tekst
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isFocused ? "#4B5563" : "#1F2937",
+      color: "#FFFFFF",
+      "&:active": {
+        backgroundColor: "#6B7280",
+      },
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      color: "#FFFFFF",
+    }),
+    placeholder: (provided) => ({
+      ...provided,
+      color: "#9CA3AF", // Szary tekst (Tailwind: text-gray-400)
+    }),
+    input: (provided) => ({
+      ...provided,
+      color: "#FFFFFF",
+    }),
+  };
 
   useEffect(() => {
     fetchEmployee();
@@ -50,11 +90,13 @@ const EmployeeDetails = () => {
   }, [employee, assignments, existingClothingData]);
 
   const generateClothingList = () => {
+    // Filtrujemy tylko te przydziały, które pasują do stanowiska pracownika
     const filtered = assignments.filter(
       (a) => a.position.name === employee.position
     );
 
     const prepared = filtered.map((entry) => {
+      // Szukamy, czy pracownik ma już taki typ ubrania
       const existing = existingClothingData.find(
         (e) => e.clothingType._id === entry.clothingType._id
       );
@@ -67,6 +109,7 @@ const EmployeeDetails = () => {
           ? employee.department
           : "Brak",
         gender: employee.gender,
+        // Jeśli istnieje w bazie, pobieramy rozmiar, w przeciwnym razie pusty string
         size: existing?.size || "",
         entitled: entry.limit,
         owned: existing?.quantity || 0,
@@ -89,16 +132,18 @@ const EmployeeDetails = () => {
         const payload = {
           employee: id,
           clothingType: item.clothingTypeId,
-          size: item.size,
+          size: item.size, // size to zawsze string
           quantity: item.owned ?? 0,
         };
 
         if (item.recordId) {
+          // Update istniejącego wpisu w bazie
           await axios.put(
             `${API_URL}employeeclothing/${item.recordId}`,
             payload
           );
         } else {
+          // Dodanie nowego
           await axios.post(`${API_URL}employeeclothing/add`, payload);
         }
       }
@@ -106,6 +151,15 @@ const EmployeeDetails = () => {
     } catch (error) {
       console.error("Błąd zapisu odzieży pracownika:", error);
     }
+  };
+
+  // Funkcja generująca opcje rozmiarów – wszystko jako string
+  const getSizeOptions = () => {
+    const combinedSizes = [...CLOTHING_SIZES, ...SHOE_SIZES];
+    return combinedSizes.map((size) => ({
+      value: size,
+      label: size,
+    }));
   };
 
   if (!employee) return <div className="text-white p-4">Ładowanie...</div>;
@@ -149,13 +203,15 @@ const EmployeeDetails = () => {
               <td className="px-4 py-2">{item.departmentColor}</td>
               <td className="px-4 py-2">{item.gender}</td>
               <td className="px-4 py-2">
-                <input
-                  type="text"
-                  value={item.size}
-                  onChange={(e) =>
-                    handleInputChange(index, "size", e.target.value)
+                <Select
+                  options={getSizeOptions()} // Zwraca wszystkie rozmiary jako stringi
+                  value={{ value: item.size, label: item.size }}
+                  onChange={(selectedOption) =>
+                    handleInputChange(index, "size", selectedOption.value)
                   }
-                  className="w-full p-1 bg-gray-700 rounded"
+                  placeholder="Wybierz rozmiar"
+                  className="text-black"
+                  styles={customStyles} // Stylizacja dla dark mode
                 />
               </td>
               <td className="px-4 py-2">{item.entitled}</td>

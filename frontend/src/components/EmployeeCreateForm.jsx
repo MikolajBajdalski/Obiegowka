@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import API_URL from "../api";
+import DEPARTMENTS from "@/constants/departments";
 
 const EmployeeCreateForm = ({ onCancel, onSave }) => {
   const [formData, setFormData] = useState({
@@ -105,9 +106,11 @@ const EmployeeCreateForm = ({ onCancel, onSave }) => {
               <option value="" disabled>
                 -- Wybierz dział --
               </option>
-              <option value="GAZY">GAZY</option>
-              <option value="OKNA">OKNA</option>
-              <option value="PPOŻ">PPOŻ</option>
+              {DEPARTMENTS.map((dept) => (
+                <option key={dept.name} value={dept.name}>
+                  {dept.name}
+                </option>
+              ))}
             </select>
           </label>
 
