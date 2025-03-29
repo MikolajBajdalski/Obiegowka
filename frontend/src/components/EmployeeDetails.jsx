@@ -30,10 +30,10 @@ const EmployeeDetails = () => {
     }),
     option: (provided, state) => ({
       ...provided,
-      backgroundColor: state.isFocused ? "#4B5563" : "#1F2937",
+      backgroundColor: state.isFocused ? "#1a5fbe" : "#000000",
       color: "#FFFFFF",
       "&:active": {
-        backgroundColor: "#6B7280",
+        backgroundColor: "#6d806b",
       },
     }),
     singleValue: (provided) => ({
