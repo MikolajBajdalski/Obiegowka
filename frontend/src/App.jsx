@@ -8,6 +8,7 @@ import PositionList from "./components/PositionList";
 import ClothingTypeList from "./components/ClothingTypeList";
 import ClothingAssignmentList from "./components/ClothingAssignmentList";
 import ClothingSummary from "./components/ClothingSummary";
+import ClothingWarehouse from "./components/ClothingWarehouse"; // Import nowego komponentu
 
 function App() {
   return (
@@ -25,6 +26,8 @@ function App() {
               element={<ClothingAssignmentList />}
             />
             <Route path="/demand" element={<ClothingSummary />} />
+            <Route path="/warehouse" element={<ClothingWarehouse />} />{" "}
+            {/* Nowa trasa */}
           </Routes>
         </main>
       </div>
