@@ -8,6 +8,7 @@ const ClothingWarehouse = () => {
   const [inventory, setInventory] = useState([]);
   const [showReceiveForm, setShowReceiveForm] = useState(false);
   const [showIssueForm, setShowIssueForm] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null); // Przechowuje wybrane ubranie
 
   const fetchInventory = async () => {
     try {
@@ -24,21 +25,14 @@ const ClothingWarehouse = () => {
 
   return (
     <div className="p-6 text-white">
-      <h1 className="text-red-600">NIE WIDZE DZIAŁU W BAZIE DANYCH !!!!!</h1>
       <h2 className="text-2xl font-bold mb-4">Magazyn ubrań</h2>
 
       <div className="mb-4">
         <button
-          className="px-4 py-2 bg-green-600 text-white rounded mr-4"
+          className="px-4 py-2 bg-green-600 text-white rounded"
           onClick={() => setShowReceiveForm(true)}
         >
           Przyjęcie magazynowe
-        </button>
-        <button
-          className="px-4 py-2 bg-blue-600 text-white rounded"
-          onClick={() => setShowIssueForm(true)}
-        >
-          Wydanie magazynowe
         </button>
       </div>
 
@@ -47,14 +41,16 @@ const ClothingWarehouse = () => {
           <tr>
             <th className="px-4 py-2 text-left">Rodzaj ubrania</th>
             <th className="px-4 py-2 text-left">Dział</th>
+            <th className="px-4 py-2 text-left">Płeć</th>
             <th className="px-4 py-2 text-left">Rozmiar</th>
             <th className="px-4 py-2 text-left">Ilość</th>
+            <th className="px-4 py-2 text-left">Akcje</th>
           </tr>
         </thead>
         <tbody>
           {inventory.length === 0 ? (
             <tr>
-              <td colSpan="4" className="px-4 py-4 text-center text-gray-400">
+              <td colSpan="6" className="px-4 py-4 text-center text-gray-400">
                 Magazyn jest pusty
               </td>
             </tr>
@@ -62,11 +58,23 @@ const ClothingWarehouse = () => {
             inventory.map((item, idx) => (
               <tr key={idx} className="border-t border-gray-700">
                 <td className="px-4 py-2">{item.clothingType.name}</td>
-                <td className="px-4 py-2">{item.department}</td>{" "}
-                {/* Wyświetlanie działu */}
-                {/* <td className="px-4 py-2">{item.color}</td> */}
+                <td className="px-4 py-2">{item.department}</td>
+                <td className="px-4 py-2">
+                  {item.gender === "Mężczyzna" ? "Mężczyzna" : "Kobieta"}
+                </td>
                 <td className="px-4 py-2">{item.size}</td>
                 <td className="px-4 py-2">{item.quantity}</td>
+                <td className="px-4 py-2">
+                  <button
+                    className="px-4 py-2 bg-blue-600 text-white rounded"
+                    onClick={() => {
+                      setSelectedItem(item);
+                      setShowIssueForm(true);
+                    }}
+                  >
+                    Wydanie
+                  </button>
+                </td>
               </tr>
             ))
           )}
@@ -81,11 +89,13 @@ const ClothingWarehouse = () => {
           }}
         />
       )}
-      {showIssueForm && (
+      {showIssueForm && selectedItem && (
         <WarehouseFormIssue
           inventory={inventory}
+          selectedItem={selectedItem} // Przekazujemy wybrane ubranie
           onClose={() => {
             setShowIssueForm(false);
+            setSelectedItem(null); // Resetujemy wybrane ubranie
             fetchInventory();
           }}
         />

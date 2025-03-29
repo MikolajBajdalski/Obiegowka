@@ -1,34 +1,43 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Select from "react-select";
+import axios from "axios";
 import API_URL from "../api";
 
-const WarehouseFormIssue = ({ inventory, onClose }) => {
+const WarehouseFormIssue = ({ inventory, selectedItem, onClose }) => {
   const [formData, setFormData] = useState({
-    selectedItem: null,
-    quantity: 0,
+    selectedItem: selectedItem || null,
+    quantity: "",
     employee: null,
   });
 
   const [employees, setEmployees] = useState([]);
 
-  // Pobierz listę pracowników
-  React.useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const res = await axios.get(`${API_URL}employees`);
-        setEmployees(
-          res.data.map((emp) => ({
-            value: emp._id,
-            label: `${emp.firstName} ${emp.lastName} (${emp.department})`,
-          }))
-        );
-      } catch (err) {
-        console.error("Błąd pobierania pracowników:", err);
-      }
-    };
+  // Pobierz kwalifikujących się pracowników
+  const fetchEligibleEmployees = async () => {
+    if (!formData.selectedItem) return;
 
-    fetchEmployees();
-  }, []);
+    try {
+      const res = await axios.post(`${API_URL}employeeClothing/eligible`, {
+        clothingType: formData.selectedItem.clothingType._id,
+        department: formData.selectedItem.department,
+        gender: formData.selectedItem.gender,
+        size: formData.selectedItem.size,
+      });
+
+      setEmployees(
+        res.data.map((emp) => ({
+          value: emp._id,
+          label: `${emp.firstName} ${emp.lastName} (${emp.department})`,
+        }))
+      );
+    } catch (err) {
+      console.error("Błąd pobierania kwalifikujących się pracowników:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchEligibleEmployees();
+  }, [formData.selectedItem]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,7 +55,8 @@ const WarehouseFormIssue = ({ inventory, onClose }) => {
     try {
       const payload = {
         clothingType: formData.selectedItem.clothingType._id,
-        color: formData.selectedItem.color,
+        department: formData.selectedItem.department,
+        gender: formData.selectedItem.gender,
         size: formData.selectedItem.size,
         quantity: formData.quantity,
         employee: formData.employee.value,
@@ -61,26 +71,37 @@ const WarehouseFormIssue = ({ inventory, onClose }) => {
     }
   };
 
-  const inventoryOptions = inventory.map((item) => ({
-    value: item,
-    label: `${item.clothingType.name} (${item.color}, ${item.size}) - ${item.quantity} szt.`,
-  }));
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-gray-800 p-6 rounded text-white w-96">
+      <div className="bg-gray-800 p-6 rounded text-white w-[800px]">
         <h2 className="text-xl font-bold mb-4">Wydanie magazynowe</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block mb-2">Ubranie</label>
-            <Select
-              options={inventoryOptions}
-              onChange={(selected) =>
-                setFormData({ ...formData, selectedItem: selected.value })
-              }
-              className="text-black"
-              placeholder="Wybierz ubranie"
-            />
+            <label className="block mb-2">Co wydajemy</label>
+            <div className="w-full bg-gray-700 rounded border border-gray-600">
+              <div className="grid grid-cols-5 gap-4 px-4 py-2 bg-gray-800 font-bold text-white">
+                <span>Rodzaj ubrania</span>
+                <span>Dział</span>
+                <span>Płeć</span>
+                <span>Rozmiar</span>
+                <span>Ilość</span>
+              </div>
+              <div className="grid grid-cols-5 gap-4 px-4 py-2">
+                {formData.selectedItem ? (
+                  <>
+                    <span>{formData.selectedItem.clothingType.name}</span>
+                    <span>{formData.selectedItem.department}</span>
+                    <span>{formData.selectedItem.gender}</span>
+                    <span>{formData.selectedItem.size}</span>
+                    <span>{formData.selectedItem.quantity} szt.</span>
+                  </>
+                ) : (
+                  <span className="col-span-5 text-center text-gray-400">
+                    Brak wybranego ubrania
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
           <div className="mb-4">
             <label className="block mb-2">Ilość</label>
@@ -103,6 +124,28 @@ const WarehouseFormIssue = ({ inventory, onClose }) => {
               }
               className="text-black"
               placeholder="Wybierz pracownika"
+              styles={{
+                control: (provided) => ({
+                  ...provided,
+                  backgroundColor: "#374151",
+                  borderColor: "#374151",
+                  color: "#ffffff",
+                }),
+                menu: (provided) => ({
+                  ...provided,
+                  backgroundColor: "#374151",
+                }),
+                option: (provided, state) => ({
+                  ...provided,
+                  backgroundColor: state.isFocused ? "#4b5563" : "#374151",
+                  color: "#ffffff",
+                  cursor: "pointer",
+                }),
+                singleValue: (provided) => ({
+                  ...provided,
+                  color: "#ffffff",
+                }),
+              }}
             />
           </div>
           <div className="flex justify-end">

@@ -35,9 +35,9 @@ const Header = () => {
           <Link to="/demand" className={navLinkClass("/demand")}>
             Zapotrzebowanie
           </Link>
-          {/* <Link to="/warehouse" className={navLinkClass("/warehouse")}>
+          <Link to="/warehouse" className={navLinkClass("/warehouse")}>
             Magazyn ubrań
-          </Link> */}
+          </Link>
         </nav>
       </div>
     </header>

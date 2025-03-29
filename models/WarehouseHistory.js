@@ -8,7 +8,8 @@ const WarehouseHistorySchema = new mongoose.Schema(
       required: true,
     },
     clothingType: { type: mongoose.Schema.Types.ObjectId, ref: "ClothingType" },
-    color: String,
+    department: String,
+    gender: String,
     size: String,
     quantity: { type: Number, required: true },
     employee: { type: mongoose.Schema.Types.ObjectId, ref: "Employee" }, // Tylko dla wydania

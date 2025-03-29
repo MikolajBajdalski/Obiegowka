@@ -21,13 +21,22 @@ const EmployeeClothingSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    department: {
+      type: String, // Kolor ubrania (dział)
+      required: true,
+    },
+    gender: {
+      type: String, // Płeć
+      required: true,
+      enum: ["Mężczyzna", "Kobieta"],
+    },
   },
   { timestamps: true }
 );
 
-// Zapewniamy unikalność pary employee + clothingType
+// Zapewniamy unikalność pary employee + clothingType + size + department + gender
 EmployeeClothingSchema.index(
-  { employee: 1, clothingType: 1 },
+  { employee: 1, clothingType: 1, size: 1, department: 1, gender: 1 },
   { unique: true }
 );
 

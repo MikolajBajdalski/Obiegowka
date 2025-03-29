@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import Select from "react-select"; // Import react-select
+import Select from "react-select";
 import API_URL from "../api";
-import { CLOTHING_SIZES, SHOE_SIZES } from "../constants/sizes"; // Import rozmiarów
+import { CLOTHING_SIZES, SHOE_SIZES } from "../constants/sizes";
 
 const EmployeeDetails = () => {
   const { id } = useParams();
@@ -11,22 +11,23 @@ const EmployeeDetails = () => {
   const [assignments, setAssignments] = useState([]);
   const [clothingList, setClothingList] = useState([]);
   const [existingClothingData, setExistingClothingData] = useState([]);
+  const [issuedClothing, setIssuedClothing] = useState([]); // Nowy stan dla wydań magazynowych
 
   const customStyles = {
     control: (provided) => ({
       ...provided,
-      backgroundColor: "#374151", // Ciemnoszary (Tailwind: bg-gray-700)
-      borderColor: "#4B5563", // Szary (Tailwind: border-gray-600)
-      color: "#FFFFFF", // Biały tekst
+      backgroundColor: "#374151",
+      borderColor: "#4B5563",
+      color: "#FFFFFF",
       boxShadow: "none",
       "&:hover": {
-        borderColor: "#6B7280", // Jaśniejszy szary (Tailwind: border-gray-500)
+        borderColor: "#6B7280",
       },
     }),
     menu: (provided) => ({
       ...provided,
-      backgroundColor: "#1F2937", // Bardzo ciemnoszary (Tailwind: bg-gray-800)
-      color: "#FFFFFF", // Biały tekst
+      backgroundColor: "#1F2937",
+      color: "#FFFFFF",
     }),
     option: (provided, state) => ({
       ...provided,
@@ -42,7 +43,7 @@ const EmployeeDetails = () => {
     }),
     placeholder: (provided) => ({
       ...provided,
-      color: "#9CA3AF", // Szary tekst (Tailwind: text-gray-400)
+      color: "#9CA3AF",
     }),
     input: (provided) => ({
       ...provided,
@@ -54,6 +55,7 @@ const EmployeeDetails = () => {
     fetchEmployee();
     fetchAssignments();
     fetchExistingClothing();
+    fetchIssuedClothing(); // Pobieramy dane o wydaniach magazynowych
   }, [id]);
 
   const fetchEmployee = async () => {
@@ -77,9 +79,19 @@ const EmployeeDetails = () => {
   const fetchExistingClothing = async () => {
     try {
       const res = await axios.get(`${API_URL}employeeclothing/employee/${id}`);
+      console.log("Dane pobrane z employeeclothing:", res.data); // Logowanie danych
       setExistingClothingData(res.data);
     } catch (err) {
       console.error("Błąd ładowania danych odzieżowych pracownika:", err);
+    }
+  };
+
+  const fetchIssuedClothing = async () => {
+    try {
+      const res = await axios.get(`${API_URL}inventory/issued/${id}`);
+      setIssuedClothing(res.data); // Zapisujemy dane o wydaniach magazynowych
+    } catch (err) {
+      console.error("Błąd ładowania wydań magazynowych:", err);
     }
   };
 
@@ -87,19 +99,23 @@ const EmployeeDetails = () => {
     if (employee && assignments.length > 0) {
       generateClothingList();
     }
-  }, [employee, assignments, existingClothingData]);
+  }, [employee, assignments, existingClothingData, issuedClothing]);
 
   const generateClothingList = () => {
-    // Filtrujemy tylko te przydziały, które pasują do stanowiska pracownika
     const filtered = assignments.filter(
       (a) => a.position.name === employee.position
     );
 
     const prepared = filtered.map((entry) => {
-      // Szukamy, czy pracownik ma już taki typ ubrania
       const existing = existingClothingData.find(
-        (e) => e.clothingType._id === entry.clothingType._id
+        (e) =>
+          e.clothingType._id === entry.clothingType._id &&
+          e.size === entry.size &&
+          e.department === employee.department &&
+          e.gender === employee.gender
       );
+
+      console.log("Dopasowany wpis z existingClothingData:", existing); // Logowanie dopasowania
 
       return {
         clothingTypeId: entry.clothingType._id,
@@ -109,14 +125,14 @@ const EmployeeDetails = () => {
           ? employee.department
           : "Brak",
         gender: employee.gender,
-        // Jeśli istnieje w bazie, pobieramy rozmiar, w przeciwnym razie pusty string
         size: existing?.size || "",
         entitled: entry.limit,
-        owned: existing?.quantity || 0,
+        quantity: existing?.quantity || 0, // Ilość posiadana
         recordId: existing?._id || null,
       };
     });
 
+    console.log("Lista ubrań:", prepared); // Logowanie listy ubrań
     setClothingList(prepared);
   };
 
@@ -132,28 +148,30 @@ const EmployeeDetails = () => {
         const payload = {
           employee: id,
           clothingType: item.clothingTypeId,
-          size: item.size, // size to zawsze string
-          quantity: item.owned ?? 0,
+          size: item.size || "Brak", // Domyślna wartość, jeśli brak rozmiaru
+          quantity: item.quantity ?? 0,
+          department: item.departmentColor || "Brak", // Domyślna wartość
+          gender: item.gender || "Brak", // Domyślna wartość
         };
 
+        console.log("Wysyłane dane:", payload); // Logowanie danych
+
         if (item.recordId) {
-          // Update istniejącego wpisu w bazie
           await axios.put(
             `${API_URL}employeeclothing/${item.recordId}`,
             payload
           );
         } else {
-          // Dodanie nowego
           await axios.post(`${API_URL}employeeclothing/add`, payload);
         }
       }
       alert("Zapisano dane pracownika.");
     } catch (error) {
       console.error("Błąd zapisu odzieży pracownika:", error);
+      alert("Wystąpił błąd podczas zapisywania danych. Sprawdź logi.");
     }
   };
 
-  // Funkcja generująca opcje rozmiarów – wszystko jako string
   const getSizeOptions = () => {
     const combinedSizes = [...CLOTHING_SIZES, ...SHOE_SIZES];
     return combinedSizes.map((size) => ({
@@ -166,6 +184,10 @@ const EmployeeDetails = () => {
 
   return (
     <div className="text-white p-6">
+      <h1 className="text-red-600 text-3xl font-bold mb-4">
+        NIE DODAJE WYDAN MAGAZYNOWY, WYDANIA MAGAZYNOWE NIE ODNOTOWUJA SIE W
+        BAZIE DANYCH
+      </h1>
       <h2 className="text-2xl font-bold mb-4">Karta pracownika</h2>
       <div className="mb-4">
         <p>
@@ -204,31 +226,18 @@ const EmployeeDetails = () => {
               <td className="px-4 py-2">{item.gender}</td>
               <td className="px-4 py-2">
                 <Select
-                  options={getSizeOptions()} // Zwraca wszystkie rozmiary jako stringi
+                  options={getSizeOptions()}
                   value={{ value: item.size, label: item.size }}
                   onChange={(selectedOption) =>
                     handleInputChange(index, "size", selectedOption.value)
                   }
                   placeholder="Wybierz rozmiar"
                   className="text-black"
-                  styles={customStyles} // Stylizacja dla dark mode
+                  styles={customStyles}
                 />
               </td>
               <td className="px-4 py-2">{item.entitled}</td>
-              <td className="px-4 py-2">
-                <input
-                  type="number"
-                  value={item.owned}
-                  onChange={(e) =>
-                    handleInputChange(
-                      index,
-                      "owned",
-                      parseInt(e.target.value) || 0
-                    )
-                  }
-                  className="w-full p-1 bg-gray-700 rounded"
-                />
-              </td>
+              <td className="px-4 py-2">{item.quantity}</td>
             </tr>
           ))}
         </tbody>

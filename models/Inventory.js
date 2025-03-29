@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const InventorySchema = new mongoose.Schema({
   clothingType: { type: mongoose.Schema.Types.ObjectId, ref: "ClothingType" },
-  color: String,
+  department: String,
   gender: String,
   size: String,
   department: String,

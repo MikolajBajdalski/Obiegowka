@@ -130,6 +130,21 @@ const WarehouseFormReceive = ({ onClose }) => {
             />
           </div>
           <div className="mb-4">
+            <label className="block mb-2">Płeć</label>
+            <Select
+              options={[
+                { value: "Mężczyzna", label: "Mężczyzna" },
+                { value: "Kobieta", label: "Kobieta" },
+              ]}
+              onChange={(selected) =>
+                setFormData({ ...formData, gender: selected.value })
+              }
+              className="text-black"
+              placeholder="Wybierz płeć"
+              styles={customStyles}
+            />
+          </div>
+          <div className="mb-4">
             <label className="block mb-2">Rozmiar</label>
             <Select
               options={ALL_SIZES.map((size) => ({
